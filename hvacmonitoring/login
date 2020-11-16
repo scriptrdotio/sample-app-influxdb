@@ -1,0 +1,2 @@
+var themeloader = require("app/entities/themeloader");
+return themeloader.serveTheme("login/view/login.html", {})

@@ -1,0 +1,85 @@
+
+var mapKey = "AIzaSyBkEYaOdre3EloXqR-IpZ9YDVHNM5vN-M0";
+var cdnJsPath = "//scriptr-cdn.s3.amazonaws.com/hvac-monitoring/javascript/";
+var cdnCssPath = "//scriptr-cdn.s3.amazonaws.com/hvac-monitoring/css/";
+
+var expiry = 60;
+var dmpDeviceBroker = "myDmpBroker";
+
+var defaultApp = "compagno";
+
+var enableInfluxDB = true;
+
+var influxDBConfig = {
+	url: "", //host and port to which influx connects
+	username: "", //The username used to connect to the database if authentication is enabled
+	password: "", //The password used to connect to the database if authentication is enabled
+	dbName: "" //The database name to which influx connects    
+}
+
+var businessRuleScript = "app/entities/rules/decisionTable";
+
+var mapper = "app/config/dataTransformation"
+
+var deviceDataTopUp =  {
+    "lat": 45.4592031, 
+    "long": -73.8248199,
+    "address": "Worldwide Corporate Headquarters 237 Hymus Boulevard Pointe Claire",
+    "city": "Quebec",
+    "country": "Canada",
+    "locationType": "Offices",
+    "locationSection": "Reception area",
+    "physicalEnvironment": "HVAC system",
+    "sensor": "compagno board",
+    "source": "simulator"
+}
+
+var email = {
+    "TO": "",
+    "FROM": "Scriptr: Connected Device App",
+    "BODY": ""
+}
+
+var templates = {
+  mail: {
+      FIRE_ALARM: {
+        subject: '<%= physicalEnvironment %> - <%= locationSection %> @ <%= address %>: Fire Alarm or Smoke Detection!',
+        body: '<%= physicalEnvironment %> in <%= locationSection %> with <%= sensor %> device <%= id %> tvoc sensor has a recording of <%= tvoc %> & co2 sensor has a recording of <%= co2 %>.'
+      },
+      
+      SYSTEM_BROKEN_ALARM: {
+        subject: '<%= physicalEnvironment %> - <%= locationSection %> @ <%= address %>: Broken System !',
+        body: '<%= physicalEnvironment %> in <%= locationSection %> with <%= sensor %> device <%= id %> accelerometer sensor has a recording of Acceleration Z of <%= acc_z %>.'
+      },
+
+      INTRUDER_DETECTED_ALARM: {
+        subject: '<%= physicalEnvironment %> - <%= locationSection %> @ <%= address %>: Intruder Detected Alarm !',
+        body: '<%= physicalEnvironment %> in <%= locationSection %> with <%= sensor %> device <%= id %> grideye sensor has a recording of <%= grideye %>.'
+      },
+      
+      COIL_MAINTENANCE_ALARAM: {
+        subject: '<%= physicalEnvironment %> - <%= locationSection %> @ <%= address %>: Coil Maintenance Alarm !',
+        body: '<%= physicalEnvironment %> in <%= locationSection %> with <%= sensor %> device <%= id %> temperature sensor has a recording of <%= temperature %> & humidity sensor has a recording of <%= humidity %>.'
+      }
+  },
+    
+  record: {
+      FIRE_ALARM: {
+        body: 'Fire Alarm or Smoke Detection: <%= physicalEnvironment %> in <%= locationSection %> with <%= sensor %> device <%= id %> tvoc sensor has a recording of <%= tvoc %> & co2 sensor has a recording of <%= co2 %>.',
+      },
+      
+      SYSTEM_BROKEN_ALARM: {
+        body: 'Broken System: <%= physicalEnvironment %> in <%= locationSection %> with <%= sensor %> device <%= id %> accelerometer sensor has a recording of Acceleration Z of <%= acc_z %>.',
+      },
+
+      INTRUDER_DETECTED_ALARM: {
+        body: 'Intruder Detected Alarm: <%= physicalEnvironment %> in <%= locationSection %> with <%= sensor %> device <%= id %> grideye sensor has a recording of <%= grideye %>.',
+      },
+      
+      COIL_MAINTENANCE_ALARAM: {
+        body: 'Coil Maintenance Alarm: <%= physicalEnvironment %> in <%= locationSection %> with <%= sensor %> device <%= id %> temperature sensor has a recording of <%= temperature %> & humidity sensor has a recording of <%= humidity %>',
+      }
+  }
+    
+ 
+}

@@ -1,0 +1,22 @@
+var deviceManager = require("app/entities/deviceManager")
+var utils = require("app/entities/utils");
+
+var query = {};
+if(request.body != null){
+	query = request.body;
+}else if(request.parameters.body){
+	query = request.parameters.body;
+} else {
+  query = request.parameters;
+}
+
+if(typeof query == 'string'){
+  	try{
+    	query = JSON.parse(query);   
+    }catch(e){
+      	return "INVALID OR MISSING PARAMETER";
+    }
+}
+
+var devices = deviceManager.getDeviceAlertsEntries(query.id);
+return devices;

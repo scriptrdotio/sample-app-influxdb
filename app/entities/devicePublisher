@@ -1,0 +1,31 @@
+var deviceManager = require("app/entities/deviceManager");
+var utils = require("app/entities/utils")
+var _ = require("modules/underscore/underscore.js")._;
+
+var log = require("log");
+log.setLevel("INFO");
+
+var publishChannel = "responseChannel"
+
+function publishDevice(entry){
+    log.info("[app/entities/devicepublisher] Publish entry: "+JSON.stringify(entry))
+	publishMapData(publishChannel, entry);
+    publishDashboardData(publishChannel, entry)
+}
+
+function publishDashboardData(channel, entry) {
+    publish(channel, {"id": "dashboard_"+entry.id, "result": {
+        "latest": entry
+        //"historical": deviceManager.getDeviceHistoricalEntries(entry.id)
+      }
+    });
+    log.info("Publish: "+ JSON.stringify({"id": "dashboard_"+entry.id, "result": {
+        "latest": entry, 
+       // "historical": deviceManager.getDeviceHistoricalEntries(entry.id)
+    }
+    }))
+}
+
+function publishMapData(channel, entry){
+     publish(channel, {"id": "map", "result": utils.format([entry])})
+}

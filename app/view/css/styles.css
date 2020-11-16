@@ -1,0 +1,253 @@
+html, body {min-height:100%; height:auto;}
+/** tabs ***/
+.nav-styled {}
+.nav-styled>li a {background: #d8d8d8; color: #222; border-radius: 0; margin: 0 1px;}
+.nav-styled>li.active>a, 
+.nav-styled>li.active>a:focus, 
+.nav-styled>li.active>a:hover {background: #ff8c00;}
+.nav-styled>li>a:focus, .nav-styled>li>a:hover {background: #e4e4e4;}
+.padder10 {padding: 10px;}
+.icon-lg {min-height: 64px;}
+.radius0 {border-radius: 0!important;}
+.full-width {width: 100%!important;}
+.pdb2 {padding-bottom: 2px;}
+.mrgr15 {margin-right: 15px;}
+.mrgb10 {margin-bottom: 10px;}
+.p15 {
+    padding: 15px;
+}
+.clear {clear: both;}
+
+.summary .fnt16 {line-height: 1.4em;}
+.mt10 {margin-top: 10px;}
+.level-bg-1 {
+    background: #4c5d6f!important;
+}
+.header-items {padding-right: 0;}
+.box-title {color: #9c9c9c; letter-spacing: -1px; padding-left: 10px; display: inline-block; width: 100%; font-weight: bold;}
+.logo {background: #283746;padding: 0;display: flex;align-items: center;}
+.logo img {height: 60%;width: auto;}
+.bg-grey-dark {background: #dedede;}
+.info-wrap {background: #e8e8e8;box-shadow: 0 0 3px #adadad;padding: 8px 0;}
+
+.btns-container {border-top: 1px solid #e8e8e8; padding-top: 10px;margin-top: 10px;}
+
+.btn {color: #fff;text-shadow: none;box-shadow: none;background-image: none;}
+.btn:hover {color: #FFF;}
+
+.btn-default {background-color: #f48220;border-color: #e47618;}
+.btn-default:hover, .btn-default:focus, .btn-default:active {background-color: #e4710d;border-color: #e47618;}
+
+.btn-danger {background-color: #d9534f;border-color: #d9534f;}
+.btn-danger:hover, .btn-danger:focus, .btn-danger:active {background-color: #C12E29;border-color: #C12E29;}
+
+
+@media (min-width:768px) {
+  main {display: flex; min-height: calc(100vh - 45px);}
+.menu-wrap {margin-top: 45px!important; display: flex; height: auto!important;}
+   main>section{flex: 1; box-sizing: border-box; width: 100%; overflow: hidden;}
+  .page-content {height: calc(100vh - 45px); position: relative; margin-top: 45px;}
+
+}
+
+@media (max-width:767px) {
+    .menu-wrap {position: relative; z-index: 1;}
+    header {position: relative; margin-top: -20px;}
+}
+
+/** map wrap ***/
+.map-wrap {bottom: 0; width: 100%; position: absolute; height: 94%; top: 45px;}
+
+ng-map {
+  width:100%; 
+  height:100%;
+  position: absolute;
+}
+
+
+.map-box ng-map  {left: 0; right: 0;}
+.map-box .box-shadow {position: relative;}
+
+.tg-thermometer {margin: 5px auto;}
+
+
+/*** autocomplete wrap ***/
+.autocomplete-wrap {
+    border-bottom: 1px solid #fff;
+    background: #e8e8e8;
+    padding: 5px 10px;
+    box-shadow: 0 0 3px #777;
+    min-height: 40px;
+    z-index: 20;
+}
+.autocomplete-wrap .loading {margin: 3px 0;}
+.autocomplete-wrap .angucomplete-dropdown {width: 98.9%;}
+
+/*** angular input ***/
+tags-input .host {height: auto;}
+tags-input .tags .input {font-family: 'Josefin Sans', sans-serif; background: #fff; font-size: 13px;}
+tags-input .tags {border:1px solid #ccc; border-radius:4px; box-shadow:inset 0 1px 1px rgba(0,0,0,.075);  height: auto;}
+tags-input .tags .tag-item {height: auto; word-break: break-all; font-family: 'Josefin Sans', sans-serif; font-size: 13px;background: #22A3DD; border: 1px solid #137ABF; color: #fff;}
+tags-input .tags .tag-item .remove-button:active {color: #137ABF;}
+tags-input .tags.focused {box-shadow: none;}
+
+/*** lock and unlock icons ***/
+.LOCKED {background-image: url("//s3.amazonaws.com/scriptr-cdn/common/images/locked.png");
+    background-repeat: no-repeat;
+    background-position: center;}
+
+.UNLOCKED {background-image: url("//s3.amazonaws.com/scriptr-cdn/common/images/unlocked.png"); 
+    background-repeat: no-repeat;
+    background-position: center;}
+
+/*** index summary ***/
+.index-summary {color:#3e434a; font-weight: bold; height: 400px!important; width:830px!important;  }
+.index-summary h5 {
+    margin: 0 0 10px 0;
+    padding: 10px;
+	color: #fff;}
+.bg-black {background: #3e434a;}
+.bg-red {background:  #d9534f;}
+.left-title {background: #3e434a; color: :#fff;}
+.right-title {background: #3e627d; color: :#fff;}
+
+header, .logo, .side-bar {
+    background: #384350;
+}
+
+.tooltip-inner {font-weight: normal; font-family: "Arial";}
+
+.log > img {
+     height: 44px;
+    width: 200px;
+}
+
+.loading-frame, .loading-frame {text-align:center; z-index: 2;     padding-top: 100px ;width: 100%; height: 100%; position: absolute;background: rgba(255,255,255,1);}
+
+
+.blink_me {
+  animation: blinker 1s linear infinite;
+  color: #d9534f;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
+
+/** overriding google maps css **/
+.ng-map-info-window > :first-child{
+    width: 870px;
+    max-width:100vw !important;
+    height: 500px;
+    max-height:85vh !important;
+    z-index:1;
+}
+
+/*overriding google maps css */
+@media (max-width:767px) {
+    .ng-map-info-window > :first-child{
+        width:870px;
+        max-width:870px!important; 
+        height: 500px;
+    }
+}
+
+.gm-style-iw-d{
+    max-height:100% !important;
+}
+
+.gm-style .gm-style-iw-a {
+    top: 268px!important;
+}
+
+.large.marker-pin {
+  width: 110px;
+  height: 110px;
+  margin: -130px 0px 0px -67px; 
+}
+
+.large.marker-pin::after {
+    width: 104px;
+    height: 104px;
+}
+
+.marker-pin {
+  width: 80px;
+  height: 80px;
+  margin: -100px 0px 0px -37px; 
+}
+
+.marker-pin::after {
+    width: 74px;
+    height: 74px;
+}
+
+.custom-div-icon .markerImg {
+    width: 24px;
+    height: 24px;
+}
+.indicator-value {
+    color: #fff;
+    font-weight: 800;
+}
+
+.dashboardTheme .box-filter {
+    word-break: break-word;
+    width: calc(100% - 65px);
+    font-weight: 700;
+    color: #000;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: default;
+    font-size: 1.2em;
+}
+
+
+input.tgl-radio-tab-child {
+    position: absolute;
+    left: -99999em;
+    top: -99999em;
+    opacity: 1;
+    z-index: 1
+}
+
+input.tgl-radio-tab-child+label {
+    cursor: pointer;
+    margin-right: -1px;
+    padding: .5em 1em;
+    position: relative;
+    color: #72abb7
+}
+
+input.tgl-radio-tab-child+label:hover {
+    color: #FFF;
+    background-color: #72abb7;
+    border-radius: 10px
+}
+
+[type=radio]:checked+label {
+    z-index: 1;
+    color: #FFF;
+    background-color: #72abb7;
+    border-radius: 10px
+}
+
+
+.username {
+    background: #75adba;
+}
+
+header, .logo, .side-bar {
+    background: #75adba;
+}
+
+.menu-wrap .level-bg-0 {
+    background: #92bbc4;
+}
+
+header {
+    background: #92bbc4;
+}

@@ -1,0 +1,209 @@
+<div ng-include="'/app/view/html/views/search/searchDevices.html'"></div>
+<section class="page-inner dashboardTheme" ng-controller="dashboardCtrl as vm" ng-init="vm.init();">
+    <div class="col-xs-12">
+        <div ng-include="'/app/view/html/views/dashboard/summary.html'"></div>
+        <div ng-if="vm.deviceKey == null" style="
+                                                 height: 90px;
+                                                 line-height: 90px;
+                                                 text-align: center;
+                                                 color: #ff8c00;
+                                                 font-size: 1em;
+                                                 " class="ng-scope">
+            <div>Select Device Key to view the corresponding live dashboard. </div>
+            <div style="font-size: 3em;">
+                <i class="fa fa-spinner fa-spin" aria-hidden="true"></i> 
+            </div>
+        </div>
+        <div class="box-filter tgl-radio-tabs">
+            <input id="live" type="radio" class="form-check-input tgl-radio-tab-child" ng-model="vm.view" value="live" ng-change="vm.changeView(vm.view)">
+            <label for="live">Live</label>
+            <input  id="historical" type="radio" class="form-check-input tgl-radio-tab-child" ng-model="vm.view" value="historical" ng-change="vm.changeView(vm.view)">
+            <label for="historical">Historical</label>
+        </div>
+       <div  ng-switch="vm.view">
+        <div gridster="vm.gridsterOptions" ng-show="vm.view == 'live'">
+            <ul>
+                <li class="myItem" gridster-item='item.size' ng-repeat="item in vm.liveItems" ng-class="{'fit-to-widget': item.noHeader === true}">
+                    <div class="box" ng-class="{'box-without-header': item.noHeader === true}">
+                        <div class="box-header">
+						    <div class="box-label"><span tooltip-append-to-body="true" uib-tooltip="{{item.label}}">{{item.label}}</span></div>
+						  </div>
+                          <div class="clearfix"></div>
+						  <div class="box-content">                              
+						  		<scriptr-gauge ng-if="item.type=='gauge'"
+                                         transport='wss'
+                                         boxLabel='{{item.label}}'
+                                         symbol='{{item.symbol}}'
+                                         gauge-value='item.gaugeValue'
+                                         on-format-data='item.formatFunction'
+                                         level-colors='{{item.levelColors}}'
+                                         min='{{item.min}}'
+                                         max='{{item.max}}'
+                                         msg-tag='{{vm.tag}}'
+                                         api-params='vm.params'                      
+                                         value-font-color='#999'
+                                         hide-min-max='false'
+                                         hide-value='false'
+                                         show-inner-shadow='false'
+                                         custom-sectors='{"percents":"false","ranges":[{}]}'
+                                         shadow-size='5'
+                                         shadow-opacity='0.8'
+                                         start-animation-type='>'
+                                         refresh-animation-type='>'
+                                         value-font-family='Source Sans Pro'
+                                         value-min-font-size='12'
+                                         label-min-font-size='12'
+                                         min-label-min-font-size='12'
+                                         max-label-min-font-size='12'
+                                         gauge-width-scale='1'
+                                         shadow-vertical-offset='3'
+                                         relative-gauge-size='true'
+                                         no-gradient='false'
+                                         start-animation-time='700'
+                                         refresh-animation-time='700'
+                                         donut='false'
+                                         donut-start-angle='90'
+                                         reverse='false'
+                                         decimals='2'
+                                         format-number='true'
+                                         human-friendly='false'
+                                         pointer='false'
+                                         counter='false'
+                                         http-method='GET'
+                                         >
+                              </scriptr-gauge>
+                              
+                              <scriptr-heatmap ng-if="item.type=='grideye'"
+                                             msg-tag='{{vm.tag}}'
+                                             transport='wss'
+                                             on-format-data="item.formatFunction"
+                                             layout-config = "item.layout"
+                                             options="item.options"
+                                             hoverinfo="z"
+                                             color-scale="item.colorScale"
+                                             >
+                             </scriptr-heatmap>
+                              
+                             <scriptr-displaycount ng-if="item.type=='accelerometer'"
+										boxHeader='false'
+										msg-tag='{{vm.tag}}'
+                                        transport='wss'
+										message='{{item.label}}'
+										number-cell-size='medium'
+										number-background-colors='[{"value":10,"color":"#ef2929"},{"value":20,"color":"#729fcf"},{"value":30,"color":"#8ae234"}]'
+										dashboard-data-handler='false'
+										http-method='GET'
+										use-window-params='false'
+										isDashboard='false'
+										query='[]'
+										widget-layout='horizontal'
+										number-font-family='Arial'
+										message-font-family='Arial'
+										number-font-size='42'
+										message-font-size='18'
+										number-font-weight='600'
+										message-font-weight='600'
+										number-text-color='#ffffff'
+										message-text-color='#686868'
+										number-background-color='#ff8c00'
+										message-background-color='white'
+										message-Text-Alignment='center'
+										number-Text-Alignment='center'
+										border-size='1'
+										border-color='#d7d7d7'
+                                  		on-format-data='item.formatFunction'
+                           		>
+                                </scriptr-displaycount>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div gridster="vm.gridsterOptions" ng-if="vm.view == 'historical'">
+            <ul>
+                <li class="myItem" gridster-item='{sizeX: 5, sizeY: 6}' ng-repeat="item in vm.historicalItems">
+                    <div class="box">
+						  <div class="box-header">
+						    <div class="box-label"><span tooltip-append-to-body="true" uib-tooltip="{{item.label}}">{{item.label}}</span></div>
+						  </div>
+                         <div class="clearfix"></div>
+                        <div class="box-content">
+                            <scriptr-dygraphs
+                                              type='line'
+                                              boxLabel='{{item.label}}'
+                                              api="app/api/getDevicesSensorsHistory"
+                                              api-params='item.apiParams'
+                                              transport='wss'
+                                              msg-tag='{{vm.tag}}'
+                                              on-format-data='item.formatFunction'
+                                              colors-mapping='item.colorsMapping'
+                                              delta="true"
+                                              events='[null]'
+                                              goals='[null]'
+                                              data-type='raw'
+                                              data-format='dygraphs'
+                                              schema-for='line'
+                                              display-metric-param='display_metric'
+                                              boxBorder='true'
+                                              grid-text-family="Source Sans Pro" 
+                                                  x1-axis-label-font-size="12" 
+                                                  x1-axis-label-width="40" 
+                                                  y2-axis-label-width="40" 
+                                                  y-axis-label-width="40" 
+                                                  y2-axis-label-font-size="10" 
+                                                  y-axis-label-font-size="10" 
+                                                  independent-ticks="independent" 
+                                                  show-legend="true" 
+                                                  legend-position="bottom" 
+                                                  draw-x1-axis="true" 
+                                                  draw-y-axis="true" 
+                                                  draw-y2-axis="true" 
+                                                  x1-axis-line-color="#e0e7ee" 
+                                                  y-axis-line-color="#e0e7ee" 
+                                                  y2-axis-line-color="#e0e7ee" 
+                                                  x1-axis-line-width="1" 
+                                                  y-axis-line-width="1" 
+                                                  y2-axis-line-width="1" 
+                                                  y-axis-include-zero="false" 
+                                                  y2-axis-include-zero="false" 
+                                                  y-axis-labels-kmb="false" 
+                                                  y2-axis-labels-kmb="false" 
+                                                  show-range-selector="true" 
+                                                  range-selector-alpha="0.6" 
+                                                  range-selector-background-line-width="1" 
+                                                  range-selector-background-stroke-color="#86a6c8" 
+                                                  range-selector-foreground-line-width="1" 
+                                                  range-selector-foreground-stroke-color="#dddedb" 
+                                                  range-selector-height="40" 
+                                                  range-selector-plot-fill-color="#b1c6dd" 
+                                                  range-selector-plot-fill-gradient-color="#FFFFFF" 
+                                                  range-selector-plot-line-width="1.5" 
+                                                  range-selector-plot-stroke-color="#d1d9e9" 
+                                                  x1-draw-grid="false" 
+                                                  y-draw-grid="true" 
+                                                  y2-draw-grid="true" 
+                                                  x1-grid-line-color="#f2f2f2" 
+                                                  y-grid-line-color="#f2f2f2" 
+                                                  y2-grid-line-color="#f2f2f2" 
+                                                  x1-grid-line-width="1" 
+                                                  y-grid-line-width="1" 
+                                                  y2-grid-line-width="1" 
+                                                  x1-axis-label="" 
+                                                  y-axis-label="" 
+                                                  y2-axis-label="" 
+                                                  connect-separated-points="true" 
+                                                  draw-points="true" 
+                                                  point-size="3" 
+                                                  stroke-width="1" 
+                                                  boxheader="true"
+                                              >
+                            </scriptr-dygraphs>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        </div>
+        </div>
+    </div>
+</section>

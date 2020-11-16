@@ -1,0 +1,216 @@
+var document = require("document");
+var device = require("device");
+var utils = require("app/entities/utils");
+var config = require("app/config/config");
+
+var _= require("modules/underscore/underscore.js")._;
+
+var log = require("log");
+log.setLevel("INFO");
+
+var event_prefix = "device_event_";
+var type = "hardware";
+
+
+function getLatestDeviceEntry(id) {
+    var seriesManager = getInfluxDB().getSeriesManager();
+    var result = seriesManager.query("SELECT LAST(timestamp),* FROM event WHERE id = '"+id+"'");
+    if(result.results && result.results.length > 0 && result.results[0].series && result.results[0].series.length > 0){
+        var columns = result.results[0].series[0].columns;
+        var values = result.results[0].series[0].values[0];
+
+        var entry = {};
+
+        for(var i=0;i<columns.length;i++){
+            if(columns[i] == "time")
+                entry["creationDate"] = values[i].substring(0, values[i].lastIndexOf(".")) + "+0000"; //map key time with creationDate,used for the map and dashboard
+
+            entry[columns[i]] = values[i];
+        }
+        return entry;
+    }else{
+        return null;
+    }
+}
+
+function getDeviceAlertsEntries(id) {
+    var seriesManager = getInfluxDB().getSeriesManager();
+    var result = seriesManager.query("SELECT * FROM event WHERE id = '"+id+"' AND isAlert = 'true' ORDER BY DESC");
+    var documents = handleQueryResult(result);
+    return documents;
+}
+
+function buildDeviceEventDocument(entry, data) {
+    _.extendOwn(entry, data);
+    delete entry.auth_token;
+    delete entry.versionNumber;
+    delete entry.latest;
+    delete entry.creator;
+    delete entry["apsdb.update"];
+
+    entry["isEvent"] = "true";
+    return entry;
+}
+
+function saveDeviceEvent(entry) {
+    var result = null;
+    log.info("[app/entities/devicemanager] saving device event."+JSON.stringify(entry))
+    var fields = {};
+    var eventType = entry["event_type"];
+    var eventTypeArr = [];
+    var keysToParse = [];
+    Object.keys(entry).forEach(function(key, i) {
+        if(key != "id" && key != "key" && key != "isAlert" && key != "isEvent"){
+            var currentEntry = entry[key];
+            if(currentEntry instanceof Object){
+                currentEntry = JSON.stringify(currentEntry);
+                currentEntry = currentEntry.replace(/\"/g, "'");
+                keysToParse.push(key);
+            } 
+            fields[key] = currentEntry;
+        }
+    });
+
+    if(keysToParse.length > 0) {
+        fields["keysToParse"] = keysToParse.join(",");
+    }
+    log.info("[app/entities/devicemanager] fields:"+JSON.stringify(fields))
+    //influxdb insert new device point
+    var seriesManager = getInfluxDB().getSeriesManager();
+    var devicePoint = {
+        measurement: "event",
+        tags: {id: entry["id"], isEvent: entry["isEvent"], isAlert: entry["isAlert"]},
+        fields: fields
+    }
+    result = seriesManager.writePoint(devicePoint);
+    log.info("[app/entities/devicemanager] saving device time series. "+JSON.stringify(result));
+    return result;
+}
+
+function buildDeviceDefinitionDocument(entry) {
+    entry["id"] = entry.id;
+    entry["password"] = utils.generate();
+    entry["type"] = type;
+    return entry;
+}
+
+function saveDeviceDefinition(entry) {
+    return device.save(entry);
+}
+
+function getDeviceDefinition(id) {
+    var params = {
+        "query" : "id =\""+ id +"\"",
+        "fields": "country,city,source,locationType,locationSection,physicalEnvironment,sensor,address,long,lat,event_type,id"
+    }
+    var result = device.query(params);
+    if(result.metadata.status == "success") {
+        return result.result.devices[0];
+    } else {
+        return null;
+    }
+}
+
+function getAllDevicesDefinition() {
+
+    var params = {
+        "query" : "type =\""+ type +"\"",
+        "fields": "*"
+    }
+
+    var result = device.query(params);
+    if(result.metadata.status == "success" && result.result.devices.length > 0) {
+        return result.result.devices;
+    } else {
+        return null;
+    }
+}
+
+function getInfluxDB(){
+    var influxModule = require("modules/influxdb/influxdb");
+    return new influxModule.InfluxDB(config.influxDBConfig);
+    return null;
+}
+
+function handleQueryResult(result){
+    if(result.results && result.results.length > 0 && result.results[0].series && result.results[0].series.length > 0){
+        var columns = result.results[0].series[0].columns;
+        var values = result.results[0].series[0].values;
+        var data = [];
+        for(var i=0;i<values.length;i++){
+            var event = values[i];
+            var entry = {};
+            var keysToParse = event[columns.indexOf("keysToParse")];
+			var keysToParseArr = (keysToParse != null && keysToParse != "") ? keysToParse.split(",") : [];
+            for(var j=0;j<columns.length;j++){
+                var currentCol = columns[j];
+                if(currentCol == "time") {
+                    //map key time with creationDate,used for the map and dashboard
+                    entry["creationDate"] = event[j].substring(0, event[j].lastIndexOf(".")) + "+0000";
+                } else if(keysToParseArr.length > 0 && keysToParseArr.indexOf(currentCol) > -1 && event[j]) {
+                    //if current column is in keysToParse array then we have to parse it back to an object
+                    entry[currentCol] =  JSON.parse(event[j].replace(/'/g, '"'));
+                } else if(currentCol != "keysToParse"){
+                    entry[currentCol] = event[j];
+                }
+            }
+            log.info("handleQueryResult entry #"+i+": " + JSON.stringify(entry));
+            data.push(entry);
+        }
+        return data;
+    }else{
+        return null;
+    }
+}
+
+function getDevicesHistoricalSensorsEntries(devices, sensors) {
+    var seriesManager = getInfluxDB().getSeriesManager();
+    var query = "";
+    _.forEach(devices, function(device, index, list){
+        query += "id = '" + device + "'" + ((index == list.length - 1) ? " " : " or ");
+    });
+    var result = seriesManager.query("SELECT " + ((Array.isArray(sensors)) ? sensors.join(",") : sensors) + " FROM event WHERE " + query + " ORDER BY ASC");
+    var documents = result.results[0].series[0].values;//handleQueryResult(result);
+    return {"count": documents.length, "documents": documents};
+}
+
+
+function getDeviceHistoricalEntries(id, recordCount, startTime, endTime, descSorting) {
+    var seriesManager = getInfluxDB().getSeriesManager();
+    var query;
+    if(descSorting)
+        query = "SELECT * FROM event WHERE id = '"+id+"' ORDER BY DESC";
+    else
+        query = "SELECT * FROM event WHERE id = '"+id+"' ORDER BY ASC";
+    if(recordCount)
+        query += " limit '"+recordCount+"'";
+    if(startTime)
+        query += " AND timestamp >= '"+startTime+"'";
+    if(endTime)
+        query += " AND timestamp <= '"+endTime+"'";
+    var result = seriesManager.query(query);
+    var documents = handleQueryResult(result);
+    return documents;
+    return {"count": documents.length, "documents": documents};
+}
+
+function getAllDeviceLatestPayload(id) {
+    var seriesManager = getInfluxDB().getSeriesManager();
+    var result = seriesManager.query("SELECT LAST(timestamp),* FROM event WHERE id = '"+id+"'");
+    if(result.results && result.results.length > 0 && result.results[0].series && result.results[0].series.length > 0){
+        var columns = result.results[0].series[0].columns;
+        var values = result.results[0].series[0].values[0];
+
+        var entry = {};
+
+        for(var i=0;i<columns.length;i++){
+            if(columns[i] == "time")
+                entry["creationDate"] = values[i].substring(0, values[i].lastIndexOf(".")) + "+0000"; //map key time with creationDate,used for the map and dashboard
+        }
+        //call function to parse
+        entry = revertToObjects(entry);
+        return entry;
+    }else{
+        return null;
+    }
+}

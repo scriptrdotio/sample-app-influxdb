@@ -1,0 +1,27 @@
+var notificationManager = require("app/entities/notificationManager");
+var templates = require("app/entities/actions/templates");
+var config = require("app/config/config");
+var _ = require("modules/underscore/underscore.js")._;
+
+var log = require("log");
+log.setLevel("INFO");
+
+function execute(request, device, alertType){
+    var notifications_settings =  notificationManager.getNotificationSettings();
+    if(notifications_settings && notifications_settings["emails"]) {
+        var emails = (typeof notifications_settings["emails"]  == 'string') ?  [notifications_settings["emails"] ] : notifications_settings["emails"] ;
+        for(var i = 0; i < emails.length; i++) {
+          sendEmailForAlertType(request, device, emails[i], config.email.FROM, alertType);
+        }
+     } else {
+        sendEmailForAlertType(request, device, config.email.TO, config.email.FROM, alertType)
+     }
+  return true;
+}
+
+function sendEmailForAlertType(request, device, toEmail, fromEmail, alertType) {
+    var subject = _.template(templates.getTemplate("mail", alertType, device).subject)(device);
+    var body = _.template(templates.getTemplate("mail", alertType, device).body)(device);
+    log.info(toEmail+ " "+ fromEmail + " " + subject + " " + body)
+    sendMail(toEmail, fromEmail, subject, body);
+}

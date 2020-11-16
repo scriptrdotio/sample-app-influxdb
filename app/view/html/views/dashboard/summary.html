@@ -1,0 +1,33 @@
+ <!-- begin row -->
+          <div class="row">
+              <!-- begin summary -->
+              <div class="col-xs-12 panel stuck summary radius0 pdb2">
+                  <section>
+                      <div class="col-xs-12 col-sm-6 col-md-3">
+                          <div class="icon bg-yellow text-center col-xs-3 p15" ng-bind-html="vm.icons.id"></div>
+                          <div class="col-xs-9">
+                              <strong>Device Id</strong> 
+                              <div class="nb fnt16">{{vm.selectedDevice.id.value}}</span>&nbsp;<span ng-if="!vm.selectedDevice"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span></div>
+                      		</div>
+                      </div>
+                  <div class="col-xs-12 col-sm-6 col-md-4">
+                      <div class="icon bg-blue text-center col-xs-3 p15" ng-bind-html="vm.icons.address"></div>
+                      <div class="col-xs-9">
+                      <strong>Address</strong>  
+                      <div class="nb fnt16">{{vm.selectedDevice.address.value || "N/A"}}<span ng-if="!vm.selectedDevice"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span></div></div>
+                  </div>
+                  <div class="col-xs-12 col-sm-6 col-md-3">
+                      <div class="icon bg-orange text-center col-xs-3 p15" ng-bind-html="vm.icons.locationType"></div>
+                      <div class="col-xs-9">
+                      <strong>Location Type</strong>    
+                      <div class="nb fnt16">{{vm.selectedDevice.locationType.value || "N/A"}}<span ng-if="!vm.selectedDevice"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span></div></div>
+                  </div>
+                  <div class="col-xs-12 col-sm-6 col-md-2">
+                      <div class="icon bg-yellow text-center col-xs-5 p15" ng-bind-html="vm.icons.time"></div>
+                      <div class="col-xs-7">
+                      <strong>Date/Time</strong>      
+                      <div class="nb fnt16">{{vm.selectedDevice.creationDate.value | date:'MM/dd/yyyy hh:mm:ss'}}<span ng-if="!vm.selectedDevice"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></span></div></div>
+                  </div>
+               </section>
+          </div>
+    </div> 

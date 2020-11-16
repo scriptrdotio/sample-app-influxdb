@@ -1,0 +1,112 @@
+var responseObject = {};
+var channels = require("channel");
+var devices = require("device");
+var users = require("user");
+var groups = require("group");
+
+
+/** Setup account default domain if none is set **/
+var subdomain = request.account.accountKey;
+var params = {
+    "apsdb.name": subdomain
+}
+
+var step = apsdb.callApi("SaveSubdomain", params, null); 
+responseObject["subdomainCreation_"+subdomain] = JSON.stringify(step)
+
+var configurationSettings = {"apsdb.optionalBindReferrer": "true"};
+responseObject["savingConfiguration"] = apsdb.callApi("SaveConfiguration", configurationSettings, null)
+
+/** Create a group editor that allows its users to access the scriptr ide plugins, ex: decision table **/
+var editorGroup = "editor";
+var step2 = groups.create(editorGroup);
+responseObject["groupCreation_"+editorGroup] = JSON.stringify(step2);
+
+/** Create a group admin that allows its users to access admin stuff **/
+var adminGroup = "admin";
+var step3 = groups.create(adminGroup);
+responseObject["groupCreation_"+adminGroup] = JSON.stringify(step3);
+
+/** Create Anonymous publish channel used to receive requests from browser **/
+var channelsList =  ["requestChannel", "responseChannel"];
+var options = {
+  "subscribeACL": "anonymous",
+  "publishACL": "anonymous"
+}
+
+channelsList.forEach(function(channel) {
+   var step5 = channels.create(channel, options);
+   responseObject["channelCreation_"+channel] = JSON.stringify(step5)
+});
+
+
+var defaultDevice = { //This device is used by to authenticate a single device
+    "id":"stwincompagno",
+    "password" : "stwincompagno",
+    "name" : "stwincompagno",
+    "type": "hardware",
+    "lat": 45.4592031, 
+    "long": -73.8248199,
+    "address": "Worldwide Corporate Headquarters 237 Hymus Boulevard Pointe Claire",
+    "city": "Quebec",
+    "country": "Canada",
+    "locationType": "Offices",
+    "locationSection": "Reception area",
+    "physicalEnvironment": "HVAC system",
+    "sensor": "compagno board",
+    "source": "simulator"
+}
+
+var devicesList = [
+    defaultDevice
+];
+
+devicesList.forEach(function(params) {
+   	var step6= devices.save(params);
+    responseObject["deviceCreation_"+params.id] = JSON.stringify(step6);
+
+    var step7= devices.generateToken(params.id);
+    responseObject["deviceToken_"+params.id] = JSON.stringify(step7);
+});
+
+
+//create users to be used to login to the app
+var usersList = [
+    {//Device used to login to iot app
+        "id":"demo",
+        "password" : "demo",
+        "name" : "demo",
+        "groups": []
+    },
+    {//Device used to login to iot app
+        "id":"admin",
+        "password" : "admin",
+        "name" : "admin",
+        "groups": ["editor","admin"]
+    }
+
+];
+
+usersList.forEach(function(params) {
+  var step8= users.save(params);
+  responseObject["userCreation_"+params.id] = JSON.stringify(step8);
+});
+
+
+//Create the channel used by the mqtt bridge between scriptr and ibm bluemix
+var channelsList =  ["deviceDigest"];
+var params = {"name" : "deviceDigest", "subscribeACL": ["authenticated"],"publishACL":  ["authenticated"]};
+var step9 = apsdb.callApi("SaveChannel", params , null )
+responseObject["channelCreation_"+params.name] = JSON.stringify(step9);
+
+
+var pubsub = require("pubsub");
+var topic = pubsub.getInstance("deviceDigest");
+var response = topic.subscribe("app/api/subscription/subscriber", "script");
+responseObject["subscribeScriptToChannel"] = JSON.stringify(response);
+
+//Set a scheduler to cleanup events
+var scheduleCleanup = schedule("app/cleanup/devicesEvents", "5 * * * ?");
+responseObject["scheduleCleanup"] = JSON.stringify(scheduleCleanup);
+
+return responseObject;

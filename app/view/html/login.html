@@ -1,0 +1,82 @@
+<!doctype html>
+<html ng-app="myApp" ng-controller="loginCtrl as vm" >  
+  <head> 
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Log In | {{vm.appTitle}}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   	<link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' type ='text/css' />
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/jquery.bootstrapvalidator/0.5.3/css/bootstrapValidator.min.css' rel='stylesheet' type ='text/css' />
+    <link href='//fonts.googleapis.com/css?family=Raleway:300,800' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Roboto:400,500,700,300' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+     
+    <%#style%>
+       <link rel="stylesheet" href="/<%theme%>/view/css/login.css"> 
+    <%/style%>
+    <%^style%>
+    	<link rel="stylesheet" href="/app/view/css/login.css"> 
+    <%/style%>
+    
+    <script src="https://code.jquery.com/jquery-1.9.1.min.js" ></script>
+    <script src="https://code.jquery.com/ui/1.9.1/jquery-ui.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.bootstrapvalidator/0.5.3/js/bootstrapValidator.min.js" ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js" ></script>
+    <script src="/app/view/javascript/login/login.js"></script>
+    <script src="/app/view/javascript/login/authorization.js"></script>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+    <script src="/app/view/javascript/login/module.js"></script>
+    <script src="/<%theme%>/view/javascript/constants.js"></script> 
+    <!-- The needed config -->
+    <script src="/app/view/javascript/config.js"></script>
+    
+  </head>
+  <script type="text/javascript"> 
+      
+    var redirect = {
+       index: "/<%theme%>/index#/map",
+    };
+      
+  	angular.module('myApp').controller('loginCtrl', function($scope, constants, $sce) {
+    	var vm = this;  
+        vm.login = constants.login;
+        vm.appTitle = constants.appTitle;
+        angular.forEach(vm.login, function(value, key) {
+           vm.login[key] = $sce.trustAsHtml(value);
+        });
+    });	
+  </script>
+  <body ng-style="{'background-image':'url({{vm.login.background}})', 'background-repeat': 'no-repeat', 'background-size': 'cover', 'background-position': 'bottom'}">
+      <div class="opacity"></div>
+      <div class="wrap">
+          <div class="element col-xs-12 col-sm-10 col-md-8">
+              <div class="doors-img col-xs-12 col-sm-6 text-center" ng-bind-html="vm.login.smallImage">
+              </div>
+              <div class="form-wrap col-xs-12 col-sm-6">
+                  <form id="loginForm">
+                      <h4>Enter your credentials</h4>
+                      <div id="errorMessage" class="error alert alert-danger hide"></div>
+                      <div class="form-group">
+                          <input class="form-control" id="id" name="id" placeholder="Username">
+                      </div>
+                      <div class="form-group">
+                          <input type="password" class="form-control" name="password" id="password" placeholder="Password">
+                      </div>
+                      <button id="submitBtn"  class="btn btn-default btn-block text-uppercase" >Login</button>
+                      <div id="loadingDiv" class="text-center" style="display:none"><i class="fa fa-spinner fa-spin fa-2x fa-fws"></i></div>
+                  </form>
+              </div>
+          </div>
+      </div>      
+      
+    <!-- end form  -->
+    <script type="text/javascript">	
+       $('#loginForm').loginWidget({redirectTarget: redirect.index, expiry: login.expiry, loginApi: login.loginApi, validateTokenApi: login.validateTokenApi});
+    </script>
+  </body>
+</html>

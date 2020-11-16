@@ -1,0 +1,16 @@
+@font-face {
+    font-family: 'texgyreherosregular';
+    src: url('//cdn.rawgit.com/scriptrdotio/resources/55aac221/fe/fonts/texgyreheros-regular-webfont.woff2') format('woff2'),
+        url('//cdn.rawgit.com/scriptrdotio/resources/55aac221/fe/fonts/texgyreheros-regular-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+.box-label {font-family: 'texgyreherosregular'; color: #5d5d5d; font-size: 12px;}
+.msg {height: 90px;
+              line-height: 90px;
+              text-align: center;
+              color: #5d5d5d;
+              font-size: 1em;}
+.loader {font-size: 3em; color: #00ab67;}
+.tooltip-inner {font-family: 'texgyreherosregular'; color: #fff; font-size: 12px;}

@@ -1,0 +1,57 @@
+
+//Define mappings between input keys and output keys
+var mappings = {"id":{"key":"id","value":"function(value){return value;}"},"temperature":{"key":"temperature","value":"function(value){return value;}"},"pressure":{"key":"pressure","value":"function(value){return value;}"},"humidity":{"key":"humidity","value":"function(value){return value;}"},"acc_x":{"key":"acceleration.accx","value":"function(value){return value;}"},"acc_y":{"key":"acceleration.accy","value":"function(value){return value;}"},"acc_z":{"key":"acceleration.accz","value":"function(value){return value;}"},"tvoc":{"key":"tvoc","value":"function(value){return value;}"},"co2":{"key":"co2","value":"function(value){return value;}"},"pm1_0":{"key":"pm.pm1_0","value":"function(value){return value;}"},"pm2_5":{"key":"pm.pm2_5","value":"function(value){return value;}"},"pm10_0":{"key":"pm.pm10_0","value":"function(value){return value;}"},"timestamp":{"key":"gps.utc","value":"function(value){var moment = require(\"modules/momentjs/moment.min.js\").moment;\nif(!value) moment().valueOf();\nelse return value;}"},"lat":{"key":"gps.lat","value":"function(value){return value;}"},"long":{"key":"gps.long","value":"function(value){return value;}"},"gps_accuracy":{"key":"gps.accuracy","value":"function(value){return value;}"},"grideye":{"key":"grideye","value":"function(value){var temperatureConversion =  function(val,bits){\n    /* compute the 2's complement of int value val */\n    if ((val & (1 << (bits - 1))) != 0 ){ \t// if sign bit is set e.g., 8bit: 128-255\n        val = val - (1 << bits)\t\t\t\t// compute negative value\t\n    }\n    return val                         \t\t// return positive value as is\n}\n\nvar tempArr = value.split(/[ ,]+/);\nvar outArr = [];\ntempArr.forEach(function(item,idx){\n    var tocom = temperatureConversion(parseInt(item),12);\n  \n    outArr.push(tocom*0.25);\n});\nreturn JSON.stringify(outArr);}"},"noise":{"key":"noise","value":"function(value){return value;}"}};    
+
+var mapIt = function(params) {
+    var values = JSON.flatten(params);
+    var output = {}
+    for (var key in mappings) {
+      if (mappings.hasOwnProperty(key)) {
+        var keyValue = values[mappings[key].key]; 
+        var transformation = eval(mappings[key].value)
+        output[key] = transformation(keyValue)
+      }
+    }
+    return JSON.unflatten(output);
+}
+
+JSON.flatten = function (data) {
+    var result = {};
+
+    function recurse(cur, prop) {
+        if (Object(cur) !== cur) {
+            result[prop] = cur;
+        } else if (Array.isArray(cur)) {
+            for (var i = 0, l = cur.length; i < l; i++)
+            recurse(cur[i], prop + "[" + i + "]");
+            if (l == 0) result[prop] = [];
+        } else {
+            var isEmpty = true;
+            for (var p in cur) {
+                isEmpty = false;
+                recurse(cur[p], prop ? prop + "." + p : p);
+            }
+            if (isEmpty && prop) result[prop] = {};
+        }
+    }
+    recurse(data, "");
+    return result;
+};
+
+JSON.unflatten = function (data) {
+    "use strict";
+    if (Object(data) !== data || Array.isArray(data)) return data;
+    var regex = /\.?([^.\[\]]+)|\[(\d+)\]/g,
+        resultholder = {};
+    for (var p in data) {
+        var cur = resultholder,
+            prop = "",
+            m;
+        while (m = regex.exec(p)) {
+            cur = cur[prop] || (cur[prop] = (m[2] ? [] : {}));
+            prop = m[2] || m[1];
+        }
+        cur[prop] = data[p];
+    }
+    return resultholder[""] || resultholder;
+};

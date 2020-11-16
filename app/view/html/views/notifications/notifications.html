@@ -1,0 +1,22 @@
+<div class="text-center loading" ng-hide="vm.emails || vm.mobiles"><i class="fa fa-spinner fa-spin fa-3x"></i></div>
+<div ng-show="vm.emails || vm.mobiles" class="col-xs-12 mt10">
+    <h5>Please enter your email adress to get notified whenever a rule is applied</h5>    
+
+        <div class="mt10">
+            <tags-input ng-model="vm.emails" placeholder="email addresses" allowed-tags-pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$"></tags-input>
+        </div>
+        <div class="mt10">
+        <scriptr-button
+                        type="btn-warning btn btn-default btn-sm"
+                        is-disabled="false"
+                        on-buttonclick="vm.buildParams"    
+                        action-transport="https"    
+                        label="Save"
+                        action-http-method = "post"
+                        action-api-params="vm.params"   
+                        api="app/api/notifications/updateSettings"
+                        type="btn-warning btn btn-default btn-sm"
+                        >
+        </scriptr-button>
+    </div>
+</div>

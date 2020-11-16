@@ -1,0 +1,19 @@
+var log = require("log");
+log.setLevel("INFO");
+
+var notificationManager = require("app/entities/notificationManager");
+var _ = require("modules/underscore/underscore.js")._;
+
+var emails = [];
+var mobiles = [];
+
+var settings = notificationManager.getNotificationSettings()
+if(settings && settings.emails) {
+    var emailsSettings = (typeof settings.emails == 'string') ?  [settings.emails] : settings.emails;
+    emails = emails.concat(emailsSettings) ;
+}
+       
+
+
+return {emails: _.uniq(emails), mobiles: _.uniq(mobiles)};
+

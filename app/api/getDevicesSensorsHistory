@@ -1,0 +1,87 @@
+var log = require("log"); 
+log.setLevel("info");
+var deviceManager = require("app/entities/deviceManager");
+var document = require("document");
+var _ = require("modules/underscore/underscore.js")._;
+var moment = require("modules/momentjs/moment.min.js").moment;
+/**  
+	* The dashboard builder will send data in the following format
+	* Over HTTP / Get Methos
+        {
+        "format": [
+          "dygraphs"
+        ],
+        "query": [
+          "{\"sensor\":[\"temperature\",\"humidity\"],\"device\":\"myDevice2\"}",
+          "{\"sensor\":[\"temperature\",\"humidity\"],\"device\":\"myDevice\"}"
+        ]
+      }
+    * Over wss
+    	{
+            "body": [
+              "{\"query\":[{\"sensor\":[\"temperature\",\"humidity\"],\"device\":\"myDevice2\"},{\"sensor\":	
+                        [\"temperature\",\"humidity\"],\"device\":\"myDevice\"}],\"format\":\"dygraphs\"}"
+            ]
+          }
+**/
+var body = request.body ? request.body : ((request.rawBody) ? request.rawBody : ((request.parameters.body) ? request.parameters.body :request.parameters));
+var params = typeof(body) == "string" ? JSON.parse(body) : body;
+/** 
+	* At this stage the query params has 1 of these 2 formats
+    * HTTP /GET
+        {
+          "query": [
+            "{\"sensor\":[\"temperature\",\"humidity\"],\"device\":\"myDevice2\"}",
+            "{\"sensor\":[\"temperature\",\"humidity\"],\"device\":\"myDevice\"}"
+          ],
+          "format": "dygraphs"
+        }
+     * WSS
+          {
+            "query": [
+              {
+                "sensor": [
+                  "temperature",
+                  "humidity"
+                ],
+                "device": "myDevice2"
+              },
+              {
+                "sensor": [
+                  "temperature",
+                  "humidity"
+                ],
+                "device": "myDevice"
+              }
+            ],
+            "format": "dygraphs"
+          }  
+**/
+var query = params.query;
+var format = params.format;
+if(typeof query == "string") query = [params.query]
+//Get the devices and the attributes we are querying for
+var devices = [];
+var sensors = ["timestamp"];
+var keys = [];
+var keysOrder = [];
+_.forEach(query, function(entry){
+    log.info("entry "+JSON.stringify(entry))
+   	var tmp = typeof(entry) == "string" ? JSON.parse(entry) : entry;
+    if(devices.indexOf(tmp.device) == -1) {
+        devices.push(tmp.device);
+    }
+    sensors = _.union(sensors,tmp.sensor);
+    _.forEach(tmp.sensor, function(sensor){
+   		 keysOrder.push(tmp.device+"-"+sensor);
+    })
+})
+devices = _.uniq(devices);
+sensors = _.uniq(sensors);
+log.info("Legend Keys: "+JSON.stringify(keysOrder));
+var result = deviceManager.getDevicesHistoricalSensorsEntries(devices, sensors);
+var data = result.documents;
+if(format == "dygraphs") {
+    return _.map(data, function(entry){ return entry.slice(1, entry.length)});
+}
+return devices;

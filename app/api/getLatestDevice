@@ -1,0 +1,16 @@
+var deviceManager = require("app/entities/deviceManager")
+var utils = require("app/entities/utils");
+
+var query = {};
+if(request.body != null){
+	query = request.body;
+}else if(request.parameters.body){
+	query = request.parameters.body;
+} else {
+  query = request.parameters;
+}
+
+var devices = [deviceManager.getLatestDeviceEntry(query.id)];
+result =  utils.format(devices);
+publish("responseChannel", {"id": "dashboard_"+query.id, "result": {"latest": devices[0]}})
+return result;

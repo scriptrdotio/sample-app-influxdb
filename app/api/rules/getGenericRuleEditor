@@ -1,0 +1,8 @@
+var config = require("app/config/config");
+var authorization =request.headers.authorization;
+var authToken = authorization.substring(7, authorization.length);
+
+
+var editorUrl = "https://embedded.scriptr.io?auth_token="+authToken+"&menu=0&tree=0&console=0&name=app/entities/rules/decisionTable&pluginName=SimpleDecisionTable";
+return editorUrl
+

@@ -1,0 +1,25 @@
+<div ng-include="'/app/view/html/views/search/searchDevices.html'"></div>
+<div ng-init="vm.init();">
+    <div ng-include="'/app/view/html/views/dashboard/summary.html'"></div>
+    <scriptr-grid ng-if="vm.colDef" columns-definition='vm.colDef' 
+               api='app/api/getDeviceAlerts'
+               api-params='vm.params'
+               enable-delete-row='false'
+               row-model-type='virtual'
+               row-height='40'    
+               grid-height='calc(100vh - 200px)'    
+               pagination="true"    
+               enable-add-row='false'
+               cell-editable='false'
+               suppress-filter="true"    
+               enable-client-side-filter='false'
+               enable-server-side-filter='false' 
+               enable-client-side-sorting='false'
+               enable-server-side-sorting='false'
+               row-model-selection='multiple'
+               pagination-page-size='100'
+               on-format-data="vm.formatData" 
+                  on-cell-clicked='vm.onCellClicked'
+               transport='https'>
+    </scriptr-grid>
+</div>

@@ -1,0 +1,13 @@
+var deviceManager = require("app/entities/deviceManager")
+
+var documents = [];
+var devices = deviceManager.getAllDevicesDefinition();
+if(devices) {
+    for(var j = 0; j < devices.length; j++) {
+        var entry = deviceManager.getLatestDeviceEntry(devices[j].id);
+        if(entry)
+            documents.push(entry)
+        }
+}
+return documents;
+

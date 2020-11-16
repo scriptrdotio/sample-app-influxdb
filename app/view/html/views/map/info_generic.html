@@ -1,0 +1,23 @@
+<div>
+    <section class="col-xs-12 index-summary">
+    <scriptr-imagemap 
+                      title="Imagemap"
+                      title-font-color="#aaa"
+                      image-url='//s3.amazonaws.com/scriptr-cdn/hvac-monitoring/images/HVAC-system-final.png'
+                      width='824'
+                      height='414'
+                      min-zoom='0'
+                      max-zoom='3'
+                      image-ratio="0.8"
+                      markers-data="vm.markersData"
+                      data="vm.transformData(marker.details)"
+                      on-format-data="vm.transformData(marker.details)">
+    </scriptr-imagemap>
+    </section>
+    <section class="clear"></section>
+    <section class="btns-container">
+        <button type="button" ng-click='vm.go("/dashboard/deviceId/"+marker.details.id)' class="btn btn-default mt15 mrgr15" ng-cloak>View Dashboard</button>
+        <button type="button" ng-click='vm.go("/alerts/deviceId/"+marker.details.id)' class="btn btn-danger mt15" ng-cloak>View Alerts</button>
+    </section>
+    <script>console.log('marker details: ', marker.details)</script>
+</div>

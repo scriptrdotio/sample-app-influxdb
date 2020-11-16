@@ -1,0 +1,50 @@
+var document = require("document")
+var deviceManager = require("app/entities/deviceManager")
+var config = require("/app/config/config");
+var _= require("modules/underscore/underscore.js")._;
+
+var log = require("log");
+log.setLevel("INFO")
+
+var notification_key = "notifications_settings";
+
+function deleteNotificationSettings() {
+     return document.delete(notification_key);
+}
+
+function saveNotificationSettings(emails) {
+   if(emails && (typeof emails == 'string'))
+       emails = [emails];
+   if(!emails)
+       emails = [];
+    
+   var result = document.get(notification_key);
+   if(result.metadata.status == "success") {
+        if(result.result.emails) {
+            var existingEmails = result.result.emails;
+            existingEmails = (typeof existingEmails == 'string') ?  [existingEmails] : existingEmails;
+            
+            var toDelete = _.difference(existingEmails,_.intersection(existingEmails, emails));
+            var toAppend = _.difference(emails, existingEmails);
+            log.info("[app/entities/notificationmanager] update notifications settings " + JSON.stringify({"key": notification_key, "emails": {"append": toAppend, "delete": toDelete}}))
+notification_key        } else {
+            log.info("[app/entities/notificationmanager] update notifications settings " + JSON.stringify({"key": notification_key, "emails": emails}))
+        }
+        document.save({"key": notification_key, "emails": emails})
+           
+   } else{
+        log.info("[app/entities/notificationmanager] create notifications settings " + JSON.stringify({"key": notification_key, "emails": emails}))
+        document.save({"key": notification_key, "emails": emails})
+   }
+}
+
+function getNotificationSettings() {
+   var result = document.get(notification_key);
+   if(result.metadata.status == "success") {
+       return result.result;
+   } else {
+       return null;
+   }
+}
+
+

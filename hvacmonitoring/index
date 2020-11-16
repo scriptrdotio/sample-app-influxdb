@@ -1,0 +1,9 @@
+var themeloader = require("app/entities/themeloader");
+var config =  require("app/config/config")
+
+return themeloader.serveTheme("app/view/html/index.html", {
+    "theme": "hvacmonitoring", 
+    "cdnJsPath": config.cdnJsPath,
+    "cdnCssPath": config.cdnCssPath,
+    "mapKey": config.mapKey
+})

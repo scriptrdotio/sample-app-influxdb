@@ -1,0 +1,68 @@
+var _ = require("modules/underscore/underscore.js")._;
+
+function format(data){
+    var result = {};
+    for(var index = 0; index < data.length; index++ ){
+        var datum = data[index];
+        if(result[datum.id] == null){
+            result[datum.id] = {
+                "0": [],
+                "order": ["0"],
+                "source": datum.source || "simulator"
+            };
+        }
+        var point = _.mapObject(datum, function(value, key){ return {"value": value}; });
+        if(point.creationDate == null)  point.creationDate = {"value": (new Date()).toISOString()};
+        result[datum.id]["0"].push(point)
+    }
+    return result;
+}
+
+/**
+* 
+* @function executeDecisionTable
+* @param {Object} [payload] the data to be processed 
+* @param {String} [decisionTable] the name of the table to be executed
+* @return {Object} the decision table result
+*
+*/
+function executeDecisionTable(decisionTable, payload){
+    var sdtLibScript = require("m/scriptUtil");
+    return sdtLibScript.execute(decisionTable, {"payload": JSON.stringify(payload)});
+}
+
+
+
+function generate(){
+  	return 'xxxxxxxx'.replace(/[xy]/g, function(c) {
+    	var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+	   	return v.toString(16);
+	});
+}
+
+
+function randomGeo(center, radius) {
+    var y0 = center.lat;
+    var x0 = center.lng;
+    var rd = radius / 111300; //about 111300 meters in one degree
+
+    var u = Math.random();
+    var v = Math.random();
+
+    var w = rd * Math.sqrt(u);
+    var t = 2 * Math.PI * v;
+    var x = w * Math.cos(t);
+    var y = w * Math.sin(t);
+
+    //Adjust the x-coordinate for the shrinking of the east-west distances
+    var xp = x / Math.cos(y0);
+
+    var newlat = y + y0;
+    var newlon = x + x0;
+    var newlon2 = xp + x0;
+
+    return {
+        'lat': newlat.toFixed(5),
+        'long': newlon.toFixed(5)
+    };
+}

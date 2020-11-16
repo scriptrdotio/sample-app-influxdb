@@ -1,0 +1,20 @@
+<div class="col-xs-12 autocomplete-wrap" ng-controller="searchDevicesCtrl as vm" ng-init="vm.init();">
+    <scriptr-autocomplete
+                          id="devicesList"
+                          placeholder="Select a device..."
+                          pause="400"
+                          search-fields="key"
+                          title-field="name"
+                          minlength="0"
+                          api="app/api/getDevices"                 
+                          text-searching="Searching..."
+                          text-no-results="No results"   
+                          msg-tag="devices-search-box"
+                          transport="wss"
+                          objects="[]"
+                          initial-value="{{vm.selectedDevice}}"
+                          on-format-data="vm.listCallback"
+                          selected-object="vm.onSelect"
+                          input-class="form-control form-control-small">
+    </scriptr-autocomplete>
+</div>

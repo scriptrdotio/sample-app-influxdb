@@ -1,0 +1,88 @@
+var log = require("log"); 
+log.setLevel("info");
+
+var devices = require("device");
+var utils = require("app/entities/utils");
+
+var _ = require("modules/underscore/underscore.js")._;
+var moment = require("modules/momentjs/moment.min.js").moment;
+
+var deviceManager = require("app/entities/deviceManager");
+var deviceEvaluator = require("app/entities/deviceEvaluator");
+var devicePublisher = require("app/entities/devicePublisher");
+
+var config = require("app/config/config");
+
+var data = {};
+var deviceId = null;
+var dataMapping = {};
+log.info("[app/api/subscription/subscriber] received the following payload \n" + JSON.stringify(request));
+
+var body = request.body ? request.body : ((request.rawBody) ? request.rawBody : request.parameters);
+var inputData = typeof(body) == "string" ? JSON.parse(body) : body;
+
+var deviceMapper = require(config.mapper);
+
+data = deviceMapper.mapIt(inputData); 
+data = _.omit(data, function(value, key, object) {
+    return _.isUndefined(value);
+});
+
+log.info("Data Transformer Output: "+JSON.stringify(data))
+
+if( (data.lat && isNaN(parseFloat(data.lat)))  || (data.long && isNaN(parseFloat(data.long)))  || (data.gps_accuracy && isNaN(parseFloat(data.gps_accuracy))) || (data.gps_accuracy && !isNaN(parseFloat(data.gps_accuracy)) && parseFloat(data.gps_accuracy) >  1.5)) { //Do not use device sent lat/long if the gps accuracy is > 1.5
+    delete data.long;
+    delete data.lat;
+}
+
+
+
+data.timestamp = moment().valueOf();
+
+if(data.id) {//If it is in payload
+    deviceId = data.id; 
+} else { //We identify it from request
+    deviceId = request.user.id;
+} 
+
+log.info("[app/api/subscription/subscriber] transform the payload into \n" + JSON.stringify(data));
+
+if(!_.isEmpty(data)) { 
+    try {
+        var deviceDefinition = deviceManager.getDeviceDefinition(deviceId);
+        log.info("Existing Device Definition: "+JSON.stringify(deviceDefinition))
+        if(deviceDefinition == null || (data.lat && !isNaN(parseFloat(data.lat))  && data.long && !isNaN(parseFloat(data.long))  && data.gps_accuracy && !isNaN(parseFloat(data.gps_accuracy)) &&  parseFloat(data.gps_accuracy) <=  1.5)) {
+            var deviceDefinition = {};
+            
+            _.extend(config.deviceDataTopUp, utils.randomGeo({"lat": config.deviceDataTopUp.lat, "lng": config.deviceDataTopUp.long}, 2000));
+            
+            deviceDefinition = _.extend(config.deviceDataTopUp, data);
+            deviceDefinition.id = deviceDefinition.name = deviceId;
+            deviceDefinition = deviceManager.buildDeviceDefinitionDocument(deviceDefinition);
+            //Save device definition
+            log.info("[app/api/subscription/subscriber] Creating Device Definition: "+JSON.stringify(deviceDefinition))
+            var result = deviceManager.saveDeviceDefinition(deviceDefinition);
+        } 
+        var entry = {};
+        entry = deviceManager.buildDeviceEventDocument(deviceDefinition, data);
+        log.info("[app/api/subscription/subscriber] Processing Event Entry: " + JSON.stringify(entry))	
+        return processEntry(entry);
+    }catch(exception) {
+        log.info("Exception: "+JSON.stringify(exception))
+        return exception;    
+    }
+} else {
+    log.info("[app/api/subscription/subscriber] No transformation found for data");
+    return;
+}
+
+
+function processEntry(entry) {
+    deviceEvaluator.evaluateDevice(entry)
+    deviceManager.saveDeviceEvent(entry);
+    devicePublisher.publishDevice(entry);
+    return entry;
+}
+
+
+

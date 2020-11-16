@@ -1,0 +1,42 @@
+var log = require("log");
+log.setLevel("INFO");
+var devices = require("device");
+var _ = require("modules/underscore/underscore.js")._;
+var moment = require("modules/momentjs/moment.min.js").moment;
+var deviceManager = require("app/entities/deviceManager");
+var documents = require("document");
+
+var devicesWithData = devices.query({"query": 'type = "hardware"', fields:"id"});
+
+
+if(devicesWithData.metadata.status == "success" ) {
+
+  //var toDate1 = moment().subtract(15,'d').startOf('day').valueOf();
+  //log.info("toDate: "+toDate1);
+
+  var events = [];
+  log.info(JSON.stringify(devicesWithData.result.devices));
+  _.forEach(devicesWithData.result.devices, function(entry){
+
+    var lastEntryToDate = deviceManager.getAllDeviceLatestPayload(entry.id);
+	
+    var d = new Date(lastEntryToDate.creationDate);
+    d.setDate(d.getDate() - 15);// 15 days
+    var toDate = Date.parse(d);
+
+	//log.info("lastEntryToDate: "+toDate);
+
+    log.info("Device Id "+ entry.id);
+    var result = deviceManager.getDeviceHistoricalEntries(entry.id, null, null, toDate, null);
+    _.forEach(result, function(doc){
+      var deleteResult = documents.delete(doc.key);
+      if(deleteResult.metadata.status == "success") {
+        events.push(doc.key)
+      }
+    })
+
+  })
+
+  return {"deletedCount": events.length,"deletedDocuments": events};
+}
+
